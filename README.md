@@ -27,7 +27,7 @@ git submodule update --init --recursive
 ```
 
 If you use the https variant, you will not get the required depenencies
-and have to download them yourself! Therefore we strongly advice to use the
+and have to download them yourself! Therefore we strongly advise to use the
 'git' protocol for download as shown above.
 
 3 Building and testing
