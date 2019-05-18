@@ -252,7 +252,7 @@ namespace ramses
         indent += IndentationStep;
 
         const ramses_internal::ProjectionParams& projParams = m_internalConfig.getProjectionParams();
-        if (projParams.nearPlane <= 0 || projParams.nearPlane >= projParams.farPlane)
+        if ((projParams.getProjectionType() != ramses_internal::ECameraProjectionType_Orthographic && projParams.nearPlane <= 0) || projParams.nearPlane >= projParams.farPlane)
         {
             addValidationMessage(EValidationSeverity_Error, indent, "near plane can not be zero or negative, greater than or equal to far plane");
             status = getValidationErrorStatus();
