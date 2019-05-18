@@ -84,7 +84,7 @@ namespace ramses_internal
     }
 
     ICommunicationSystem* CommunicationSystemFactory::ConstructCommunicationSystem(const ramses::RamsesFrameworkConfigImpl& config, const ParticipantIdentifier& participantIdentifier,
-        PlatformLock& frameworkLock, StatisticCollectionFramework& statisticCollection)
+        PlatformLock& frameworkLock, StatisticCollectionFramework& )
     {
         UNUSED(participantIdentifier);
         UNUSED(frameworkLock);
