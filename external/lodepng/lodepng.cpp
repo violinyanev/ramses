@@ -27,7 +27,6 @@ freely, subject to the following restrictions:
 The manual and changelog are in the header file "lodepng.h"
 Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for C.
 */
-
 #include "lodepng.h"
 
 #include <limits.h>
@@ -46,6 +45,45 @@ Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for
 
 const char* LODEPNG_VERSION_STRING = "20180114";
 
+#include <errno.h>
+#include <android/asset_manager.h>
+#include <android/log.h>
+
+
+static int android_read(void* cookie, char* buf, int size) {
+  return AAsset_read(reinterpret_cast<AAsset*>(cookie), buf, size);
+}
+
+static int android_write(void* , const char* , int ) {
+  return EACCES; // can't provide write access to the apk
+}
+
+static fpos_t android_seek(void* cookie, fpos_t offset, int whence) {
+  return AAsset_seek(reinterpret_cast<AAsset*>(cookie), offset, whence);
+}
+
+static int android_close(void* cookie) {
+  AAsset_close(reinterpret_cast<AAsset*>(cookie));
+  return 0;
+}
+
+// must be established by someone else...
+extern AAssetManager* android_asset_manager;
+void android_fopen_set_asset_manager(AAssetManager* manager) {
+  __android_log_print(ANDROID_LOG_ERROR, "RamsesNativeInterface", "set asset manager inside native!");
+  android_asset_manager = manager;
+}
+
+FILE* android_fopen(const char* fname, const char* mode) {
+  __android_log_print(ANDROID_LOG_ERROR, "RamsesNativeInterface", "try to open a file asset: %s", fname);
+  if(mode[0] == 'w') return NULL;
+
+  AAsset* asset = AAssetManager_open(android_asset_manager, fname, 0);
+  if(!asset) return NULL;
+
+  return funopen(asset, android_read, android_write, android_seek, android_close);
+}
+ #define fopen(name, mode) android_fopen(name, mode)
 /*
 This source file is built up in the following large parts. The code sections
 with the "LODEPNG_COMPILE_" #defines divide this up further in an intermixed way.
@@ -351,13 +389,15 @@ static void lodepng_add32bitInt(ucvector* buffer, unsigned value)
 /* ////////////////////////////////////////////////////////////////////////// */
 
 #ifdef LODEPNG_COMPILE_DISK
-
+#include <android/log.h>
 /* returns negative value on error. This should be pure C compatible, so no fstat. */
 static long lodepng_filesize(const char* filename)
 {
+  __android_log_print(ANDROID_LOG_ERROR, "RamsesNativeInterface", "ass: lodepng_filesize:");
   FILE* file;
   long size;
   file = fopen(filename, "rb");
+  __android_log_print(ANDROID_LOG_ERROR, "RamsesNativeInterface", "ass: lodepng_filesize:");
   if(!file) return -1;
 
   if(fseek(file, 0, SEEK_END) != 0)
@@ -367,6 +407,7 @@ static long lodepng_filesize(const char* filename)
   }
 
   size = ftell(file);
+  __android_log_print(ANDROID_LOG_ERROR, "RamsesNativeInterface", "ass: lodepng size: %ld!", size);
   /* It may give LONG_MAX as directory size, this is invalid for us. */
   if(size == LONG_MAX) size = -1;
 

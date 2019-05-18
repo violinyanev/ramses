@@ -90,13 +90,9 @@ namespace ramses_capu
         inline
         status_t File::getSizeInBytes(uint_t& size) const
         {
-            struct stat tmp;
-            int_t status = stat(mPath.c_str(), &tmp);
-            if (status != 0)
-            {
-                return CAPU_ERROR;
-            }
-            size = tmp.st_size;
+          fseek(mHandle, 0L, SEEK_END);
+          size = ftell(mHandle);
+          fseek(mHandle, 0L, SEEK_SET);
             return CAPU_OK;
         }
 
@@ -154,12 +150,7 @@ namespace ramses_capu
         inline
         bool File::exists() const
         {
-            struct stat fileStats;
-            int_t status = stat(mPath.c_str(), &fileStats);
-            if (status != 0)
-            {
-                return false;
-            }
+
             return true;
         }
 
@@ -209,7 +200,7 @@ namespace ramses_capu
             default:
                 flags = "";
             }
-            mHandle  = fopen(mPath.c_str(), flags);
+            mHandle  = android_fopen(mPath.c_str(), flags);
             if (mHandle != NULL)
             {
                 mIsOpen = true;
