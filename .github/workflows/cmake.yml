@@ -28,7 +28,7 @@ jobs:
       # Recursively checkout submodules
       # TODO Violin use shallow clone to save resources
       run: |
-        git submodule update --init --recursive
+        git submodule update --depth 1 --init --recursive
       if: ${{ matrix.os == 'windows-latest' }}
 
     - name: Fetch submodules linux
@@ -37,13 +37,7 @@ jobs:
       run: |
         auth_header="$(git config --local --get http.https://github.com/.extraheader)"
         git submodule sync --recursive
-        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --recursive
-      if: ${{ matrix.os == 'ubuntu-latest' }}
-
-    - name: Install clang and clang-tidy
-      run: |
-        sudo apt-get install -y clang-10 clang-tidy-10 llvm-10
-        sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-10 100
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --depth 1 --init --recursive
       if: ${{ matrix.os == 'ubuntu-latest' }}
 
     - name: Create Build Environment
