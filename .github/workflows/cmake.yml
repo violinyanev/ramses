@@ -50,7 +50,6 @@ jobs:
       run: |
         cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
             -Dramses-sdk_BUILD_EXAMPLES=OFF \
-            -Dramses-sdk_BUILD_TOOLS=OFF \
             -Dramses-sdk_BUILD_SMOKE_TESTS=OFF \
             -Dramses-sdk_BUILD_DEMOS=OFF \
             -Dramses-sdk_BUILD_CLIENT_ONLY_SHARED_LIB=ON \
